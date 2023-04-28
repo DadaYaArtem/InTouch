@@ -42,5 +42,8 @@ dependencies {
     implementation "androidx.recyclerview:recyclerview-selection:1.1.0"
     // https://mvnrepository.com/artifact/com.google.android.material/material
     runtimeOnly 'com.google.android.material:material:1.8.0'
+    // https://mvnrepository.com/artifact/org.projectlombok/lombok
+    compileOnly 'org.projectlombok:lombok:1.18.12'
+    annotationProcessor 'org.projectlombok:lombok:1.18.12'
 
 }
