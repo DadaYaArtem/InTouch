@@ -33,7 +33,7 @@ public class ToDoAdapter extends RecyclerView.Adapter<ToDoAdapter.ViewHolder> {
     public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
         ToDoEntity item = todoList.get(position);
         holder.task.setText(item.getTask());
-        holder.task.setChecked(item.getStatus());
+        holder.task.setChecked(item.isDone());
     }
 
     @Override

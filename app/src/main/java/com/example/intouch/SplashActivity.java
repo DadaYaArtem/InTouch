@@ -15,12 +15,9 @@ public class SplashActivity extends AppCompatActivity {
         getSupportActionBar().hide();
 
         final Intent i = new Intent(SplashActivity.this, MainActivity.class);
-        new Handler().postDelayed(new Runnable() {
-            @Override
-            public void run() {
-                startActivity(i);
-                finish();
-            }
+        new Handler().postDelayed(() -> {
+            startActivity(i);
+            finish();
         },1000);
     }
 }

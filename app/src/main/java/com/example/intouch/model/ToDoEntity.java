@@ -1,40 +1,16 @@
 package com.example.intouch.model;
 
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.experimental.Accessors;
+
+@Data
+@AllArgsConstructor
+@NoArgsConstructor
 public class ToDoEntity {
     private long id;
-    private boolean status;
+    private boolean isDone;
     private String task;
-
-    public long getId() {
-        return id;
-    }
-
-    public void setId(long id) {
-        this.id = id;
-    }
-
-    public boolean getStatus() {
-        return status;
-    }
-
-    public void setStatus(boolean status) {
-        this.status = status;
-    }
-
-    public String getTask() {
-        return task;
-    }
-
-    public void setTask(String task) {
-        this.task = task;
-    }
-
-    public ToDoEntity(long id, boolean status, String task) {
-        this.id = id;
-        this.status = status;
-        this.task = task;
-    }
-
-    public ToDoEntity() {
-    }
 }
