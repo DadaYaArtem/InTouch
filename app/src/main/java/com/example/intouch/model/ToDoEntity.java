@@ -12,5 +12,5 @@ import lombok.experimental.Accessors;
 public class ToDoEntity {
     private long id;
     private boolean isDone;
-    private String task;
+    private String description;
 }

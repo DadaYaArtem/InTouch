@@ -12,11 +12,18 @@ import android.text.TextUtils;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.EditText;
+import android.widget.Toast;
 
 import com.example.intouch.adapter.ToDoAdapter;
+import com.example.intouch.api.TaskApiClient;
 import com.example.intouch.callback.SwipeToDeleteCallback;
 import com.example.intouch.model.ToDoEntity;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
+import com.google.gson.Gson;
+import com.google.gson.reflect.TypeToken;
+
+import org.json.JSONArray;
+import org.json.JSONException;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -28,6 +35,8 @@ public class MainActivity extends AppCompatActivity {
     private RecyclerView tasksRecycleView;
     private ToDoAdapter tasksAdapter;
     private List<ToDoEntity> tasksList;
+    private TaskApiClient taskApiClient = new TaskApiClient();
+    private Gson gson = new Gson();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -42,15 +51,17 @@ public class MainActivity extends AppCompatActivity {
         tasksAdapter = new ToDoAdapter(this);
         tasksRecycleView.setAdapter(tasksAdapter);
 
-        tasksList.add(new ToDoEntity(ThreadLocalRandom.current().nextInt(0 ,10000), false,  UUID.randomUUID().toString()));
-        tasksList.add(new ToDoEntity(ThreadLocalRandom.current().nextInt(0 ,10000), false,  UUID.randomUUID().toString()));
-        tasksList.add(new ToDoEntity(ThreadLocalRandom.current().nextInt(0 ,10000), false,  UUID.randomUUID().toString()));
-        tasksList.add(new ToDoEntity(ThreadLocalRandom.current().nextInt(0 ,10000), false,  UUID.randomUUID().toString()));
-        tasksList.add(new ToDoEntity(ThreadLocalRandom.current().nextInt(0 ,10000), false,  UUID.randomUUID().toString()));
-        tasksList.add(new ToDoEntity(ThreadLocalRandom.current().nextInt(0 ,10000), false,  UUID.randomUUID().toString()));
-        tasksList.add(new ToDoEntity(ThreadLocalRandom.current().nextInt(0 ,10000), false,  UUID.randomUUID().toString()));
-
-        tasksAdapter.setTasks(tasksList);
+        taskApiClient.getAllTasks(new TaskApiClient.TaskApiCallback() {
+            @Override
+            public void onTaskApiResponse(String response) {
+                if (response != null) {
+                    tasksList = gson.fromJson(response, new TypeToken<List<ToDoEntity>>(){}.getType());
+                    tasksAdapter.setTasks(tasksList);
+                } else {
+                    Toast.makeText(MainActivity.this, "Failed to get tasks", Toast.LENGTH_SHORT).show();
+                }
+            }
+        });
 
         FloatingActionButton fab = findViewById(R.id.fab);
         fab.setOnClickListener(view -> showAddTaskDialog());
