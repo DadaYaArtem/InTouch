@@ -68,7 +68,15 @@ public class MainActivity extends AppCompatActivity {
         FloatingActionButton fab = findViewById(R.id.fab);
         fab.setOnClickListener(view -> showAddTaskDialog());
 
-        ItemTouchHelper itemTouchHelper = new ItemTouchHelper(new SwipeToDeleteCallback(tasksAdapter));
+        ItemTouchHelper itemTouchHelper = new ItemTouchHelper(new SwipeToDeleteCallback(new SwipeToDeleteCallback.OnSwipeCallback() {
+            @Override
+            public void onSwipe(int position) {
+                ToDoEntity deletedTask = tasksList.get(position);
+
+                // Call a method to send the delete request to the backend
+                deleteTaskFromBackend(deletedTask);
+            }
+        }));
         itemTouchHelper.attachToRecyclerView(tasksRecycleView);
     }
 
@@ -77,8 +85,8 @@ public class MainActivity extends AppCompatActivity {
         Executors.newSingleThreadExecutor().execute(() -> {
             taskApiClient.getAllTasks(new TaskApiClient.TaskApiCallback() {
                 @Override
-                public void onTaskApiResponse(List<ToDoEntity> tasks) {
-                    runOnUiThread(() -> handleApiResponse(tasks));
+                public void onTaskApiResponse(Object response) {
+                    runOnUiThread(() -> handleApiResponse((List<ToDoEntity>) response));
                 }
 
                 @Override
@@ -118,11 +126,14 @@ public class MainActivity extends AppCompatActivity {
                 if (!TextUtils.isEmpty(taskText)) {
                     // Create a new task and add it to the adapter
                     ToDoEntity newTask = new ToDoEntity(
-                            ThreadLocalRandom.current().nextInt(0, 10000),
+                            0,  // Assuming your backend generates the ID
                             false,
                             taskText
                     );
                     tasksAdapter.addTask(newTask);
+
+                    // Call a method to send the new task to the backend
+                    sendTaskToBackend(newTask);
                 }
             }
         });
@@ -131,5 +142,40 @@ public class MainActivity extends AppCompatActivity {
 
         AlertDialog dialog = builder.create();
         dialog.show();
+    }
+
+    private void sendTaskToBackend(ToDoEntity newTask) {
+        // Use your TaskApiClient to send the new task to the backend
+        taskApiClient.addTask(newTask, new TaskApiClient.TaskApiCallback() {
+            @Override
+            public void onTaskApiResponse(Object response) {
+                fetchData();
+            }
+
+            @Override
+            public void onTaskApiError(String errorMessage) {
+                Toast.makeText(MainActivity.this, "Unexpected response", Toast.LENGTH_SHORT).show();
+            }
+        });
+    }
+
+    private void deleteTaskFromBackend(ToDoEntity deletedTask) {
+        int position = tasksList.indexOf(deletedTask);
+        if (position != -1) {
+            tasksAdapter.deleteTask(position);
+        }
+        taskApiClient.deleteTask(deletedTask.getId(), new TaskApiClient.TaskApiCallback() {
+            @Override
+            public void onTaskApiResponse(Object response) {
+                fetchData();
+            }
+
+            @Override
+            public void onTaskApiError(String errorMessage) {
+                // Handle the error if needed
+                // You might want to display an error message to the user
+                Toast.makeText(MainActivity.this, "Failed to delete task:", Toast.LENGTH_SHORT).show();
+            }
+        });
     }
 }

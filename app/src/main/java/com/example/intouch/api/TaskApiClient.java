@@ -33,7 +33,7 @@ public class TaskApiClient {
 
 
     public interface TaskApiCallback {
-        void onTaskApiResponse(List<ToDoEntity> tasks);
+        void onTaskApiResponse(Object response);
         void onTaskApiError(String errorMessage);
     }
 
@@ -52,6 +52,50 @@ public class TaskApiClient {
 
             @Override
             public void onFailure(Call<List<ToDoEntity>> call, Throwable t) {
+                callback.onTaskApiError("Network error: " + t.getMessage());
+            }
+        });
+    }
+
+    public void addTask(ToDoEntity task, TaskApiCallback callback) {
+        // Assuming you have a specific endpoint for adding tasks in YourApiService
+        Call<ToDoEntity> call = apiService.addTask(task);
+
+        call.enqueue(new Callback<ToDoEntity>() {
+            @Override
+            public void onResponse(Call<ToDoEntity> call, Response<ToDoEntity> response) {
+                if (response.isSuccessful()) {
+                    // Notify the callback that the task was successfully added
+                    callback.onTaskApiResponse("Task added successfully");
+                } else {
+                    // Notify the callback about the error
+                    callback.onTaskApiError("Failed to add task. Server returned " + response.code());
+                }
+            }
+
+            @Override
+            public void onFailure(Call<ToDoEntity> call, Throwable t) {
+                // Notify the callback about the network error
+                callback.onTaskApiError("Network error: " + t.getMessage());
+            }
+        });
+    }
+
+    public void deleteTask(long taskId, TaskApiCallback callback) {
+        Call<Void> call = apiService.deleteTask(taskId);
+
+        call.enqueue(new Callback<Void>() {
+            @Override
+            public void onResponse(Call<Void> call, Response<Void> response) {
+                if (response.isSuccessful()) {
+                    callback.onTaskApiResponse("Task deleted successfully");
+                } else {
+                    callback.onTaskApiError("Failed to delete task. Server returned " + response.code());
+                }
+            }
+
+            @Override
+            public void onFailure(Call<Void> call, Throwable t) {
                 callback.onTaskApiError("Network error: " + t.getMessage());
             }
         });

@@ -6,12 +6,14 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.intouch.adapter.ToDoAdapter;
 
-public class SwipeToDeleteCallback extends ItemTouchHelper.Callback {
-    private ToDoAdapter adapter;
+public class SwipeToDeleteCallback extends ItemTouchHelper.SimpleCallback  {
+
+    private final OnSwipeCallback callback;
 
 
-    public SwipeToDeleteCallback(ToDoAdapter adapter) {
-        this.adapter = adapter;
+    public SwipeToDeleteCallback(OnSwipeCallback callback) {
+        super(0, ItemTouchHelper.LEFT | ItemTouchHelper.RIGHT);
+        this.callback = callback;
     }
 
     @Override
@@ -30,6 +32,10 @@ public class SwipeToDeleteCallback extends ItemTouchHelper.Callback {
     public void onSwiped(RecyclerView.ViewHolder viewHolder, int direction) {
         // Swiped to the right, delete the item
         int position = viewHolder.getAdapterPosition();
-        adapter.deleteTask(position);
+        callback.onSwipe(position);
+    }
+
+    public interface OnSwipeCallback {
+        void onSwipe(int position);
     }
 }
