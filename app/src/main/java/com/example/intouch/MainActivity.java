@@ -2,6 +2,8 @@ package com.example.intouch;
 
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.lifecycle.ViewModelProvider;
+import androidx.lifecycle.ViewModelProviders;
 import androidx.recyclerview.widget.ItemTouchHelper;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
@@ -17,6 +19,7 @@ import android.widget.Toast;
 import com.example.intouch.adapter.ToDoAdapter;
 import com.example.intouch.api.TaskApiClient;
 import com.example.intouch.callback.SwipeToDeleteCallback;
+import com.example.intouch.model.MainViewModel;
 import com.example.intouch.model.ToDoEntity;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.gson.Gson;
@@ -28,6 +31,7 @@ import org.json.JSONException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
+import java.util.concurrent.Executors;
 import java.util.concurrent.ThreadLocalRandom;
 
 public class MainActivity extends AppCompatActivity {
@@ -51,24 +55,50 @@ public class MainActivity extends AppCompatActivity {
         tasksAdapter = new ToDoAdapter(this);
         tasksRecycleView.setAdapter(tasksAdapter);
 
-        taskApiClient.getAllTasks(new TaskApiClient.TaskApiCallback() {
-            @Override
-            public void onTaskApiResponse(String response) {
-                if (response != null) {
-                    tasksList = gson.fromJson(response, new TypeToken<List<ToDoEntity>>(){}.getType());
-                    tasksAdapter.setTasks(tasksList);
-                } else {
-                    Toast.makeText(MainActivity.this, "Failed to get tasks", Toast.LENGTH_SHORT).show();
-                }
-            }
-        });
+        MainViewModel viewModel = new ViewModelProvider(this).get(MainViewModel.class);
 
+        if (viewModel.getTasks() != null && viewModel.getTasks().size() > 0) {
+            tasksList = viewModel.getTasks();
+            tasksAdapter.setTasks(tasksList);
+        } else {
+            // Fetch data if not available in the ViewModel
+            taskApiClient = new TaskApiClient();
+            fetchData();
+        }
         FloatingActionButton fab = findViewById(R.id.fab);
         fab.setOnClickListener(view -> showAddTaskDialog());
 
         ItemTouchHelper itemTouchHelper = new ItemTouchHelper(new SwipeToDeleteCallback(tasksAdapter));
         itemTouchHelper.attachToRecyclerView(tasksRecycleView);
+    }
 
+    private void fetchData() {
+        // Use a background thread for network operations
+        Executors.newSingleThreadExecutor().execute(() -> {
+            taskApiClient.getAllTasks(new TaskApiClient.TaskApiCallback() {
+                @Override
+                public void onTaskApiResponse(List<ToDoEntity> tasks) {
+                    runOnUiThread(() -> handleApiResponse(tasks));
+                }
+
+                @Override
+                public void onTaskApiError(String errorMessage) {
+                    runOnUiThread(() -> Toast.makeText(MainActivity.this, errorMessage, Toast.LENGTH_SHORT).show());
+                }
+            });
+        });
+    }
+
+    private void handleApiResponse(List<ToDoEntity> tasks) {
+        if (tasks != null) {
+            tasksList = tasks;
+            tasksAdapter.setTasks(tasksList);
+
+            // Save data to ViewModel for configuration changes
+            ViewModelProviders.of(this).get(MainViewModel.class).setTasks(tasksList);
+        } else {
+            Toast.makeText(MainActivity.this, "Failed to get tasks", Toast.LENGTH_SHORT).show();
+        }
     }
 
     private void showAddTaskDialog() {
