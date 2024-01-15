@@ -19,6 +19,7 @@ import android.widget.Toast;
 import com.example.intouch.adapter.ToDoAdapter;
 import com.example.intouch.api.TaskApiClient;
 import com.example.intouch.callback.SwipeToDeleteCallback;
+import com.example.intouch.callback.TaskCallback;
 import com.example.intouch.model.MainViewModel;
 import com.example.intouch.model.ToDoEntity;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
@@ -34,12 +35,13 @@ import java.util.UUID;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ThreadLocalRandom;
 
-public class MainActivity extends AppCompatActivity {
+public class MainActivity extends AppCompatActivity implements TaskCallback {
 
     private RecyclerView tasksRecycleView;
     private ToDoAdapter tasksAdapter;
     private List<ToDoEntity> tasksList;
     private TaskApiClient taskApiClient = new TaskApiClient();
+    private TaskCallback callback;
     private Gson gson = new Gson();
 
     @Override
@@ -105,7 +107,7 @@ public class MainActivity extends AppCompatActivity {
             // Save data to ViewModel for configuration changes
             ViewModelProviders.of(this).get(MainViewModel.class).setTasks(tasksList);
         } else {
-            Toast.makeText(MainActivity.this, "Failed to get tasks", Toast.LENGTH_SHORT).show();
+            callback.onTaskApiError("Failed to get tasks");
         }
     }
 
@@ -154,7 +156,7 @@ public class MainActivity extends AppCompatActivity {
 
             @Override
             public void onTaskApiError(String errorMessage) {
-                Toast.makeText(MainActivity.this, "Unexpected response", Toast.LENGTH_SHORT).show();
+                callback.onTaskApiError("Unexpected response");
             }
         });
     }
@@ -172,10 +174,13 @@ public class MainActivity extends AppCompatActivity {
 
             @Override
             public void onTaskApiError(String errorMessage) {
-                // Handle the error if needed
-                // You might want to display an error message to the user
-                Toast.makeText(MainActivity.this, "Failed to delete task:", Toast.LENGTH_SHORT).show();
+                callback.onTaskApiError("Failed to delete task:");
             }
         });
+    }
+
+    @Override
+    public void onTaskApiError(String errorMessage) {
+        Toast.makeText(MainActivity.this, errorMessage, Toast.LENGTH_SHORT).show();
     }
 }
