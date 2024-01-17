@@ -8,7 +8,7 @@ import android.widget.CheckBox;
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
-import com.example.intouch.MainActivity;
+import com.example.intouch.activity.MainActivity;
 import com.example.intouch.R;
 import com.example.intouch.model.ToDoEntity;
 

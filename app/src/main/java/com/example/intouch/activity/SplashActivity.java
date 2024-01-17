@@ -1,10 +1,12 @@
-package com.example.intouch;
+package com.example.intouch.activity;
 
 import androidx.appcompat.app.AppCompatActivity;
 
 import android.content.Intent;
 import android.os.Bundle;
 import android.os.Handler;
+
+import com.example.intouch.R;
 
 public class SplashActivity extends AppCompatActivity {
 

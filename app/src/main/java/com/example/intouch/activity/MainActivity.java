@@ -1,4 +1,4 @@
-package com.example.intouch;
+package com.example.intouch.activity;
 
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
@@ -13,10 +13,10 @@ import android.os.Bundle;
 import android.text.TextUtils;
 import android.view.LayoutInflater;
 import android.view.View;
-import android.widget.CheckBox;
 import android.widget.EditText;
 import android.widget.Toast;
 
+import com.example.intouch.R;
 import com.example.intouch.adapter.ToDoAdapter;
 import com.example.intouch.callback.SwipeToDeleteCallback;
 import com.example.intouch.model.MainViewModel;
@@ -28,12 +28,12 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class MainActivity extends AppCompatActivity implements TaskService.TaskServiceCallback {
+    private static final long NEW_TASK_ID = 0;
 
-    private RecyclerView tasksRecycleView;
+    private RecyclerView tasksRecyclerView;
     private ToDoAdapter tasksAdapter;
     private List<ToDoEntity> tasksList;
-    private TaskService taskService = new TaskService();
-
+    private TaskService taskService;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -41,36 +41,47 @@ public class MainActivity extends AppCompatActivity implements TaskService.TaskS
         setContentView(R.layout.activity_main);
         getSupportActionBar().hide();
 
+        taskService = new TaskService();
         tasksList = new ArrayList<>();
 
-        tasksRecycleView = findViewById(R.id.tasksRecycleView);
-        tasksRecycleView.setLayoutManager(new LinearLayoutManager(this ));
-        tasksAdapter = new ToDoAdapter(this);
-        tasksRecycleView.setAdapter(tasksAdapter);
+        setupRecyclerView();
+        setupViewModel();
+        setupFloatingActionButton();
+        setupItemTouchHelper();
+    }
 
+    private void setupRecyclerView() {
+        tasksRecyclerView = findViewById(R.id.tasksRecycleView);
+        tasksRecyclerView.setLayoutManager(new LinearLayoutManager(this));
+        tasksAdapter = new ToDoAdapter(this);
+        tasksRecyclerView.setAdapter(tasksAdapter);
+    }
+
+    private void setupViewModel() {
         MainViewModel viewModel = new ViewModelProvider(this).get(MainViewModel.class);
 
         if (viewModel.getTasks() != null && viewModel.getTasks().size() > 0) {
             tasksList = viewModel.getTasks();
             tasksAdapter.setTasks(tasksList);
         } else {
-            // Fetch data if not available in the ViewModel
             taskService.fetchTasks(this);
         }
+    }
+
+    private void setupFloatingActionButton() {
         FloatingActionButton fab = findViewById(R.id.fab);
         fab.setOnClickListener(view -> showAddTaskDialog());
+    }
 
-
+    private void setupItemTouchHelper() {
         ItemTouchHelper itemTouchHelper = new ItemTouchHelper(new SwipeToDeleteCallback(new SwipeToDeleteCallback.OnSwipeCallback() {
             @Override
             public void onSwipe(int position) {
                 ToDoEntity deletedTask = tasksList.get(position);
-
-                // Call a method to send the delete request to the backend
                 taskService.deleteTask(deletedTask.getId(), MainActivity.this);
             }
         }));
-        itemTouchHelper.attachToRecyclerView(tasksRecycleView);
+        itemTouchHelper.attachToRecyclerView(tasksRecyclerView);
     }
 
     private void showAddTaskDialog() {
