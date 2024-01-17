@@ -13,36 +13,27 @@ import android.os.Bundle;
 import android.text.TextUtils;
 import android.view.LayoutInflater;
 import android.view.View;
+import android.widget.CheckBox;
 import android.widget.EditText;
 import android.widget.Toast;
 
 import com.example.intouch.adapter.ToDoAdapter;
-import com.example.intouch.api.TaskApiClient;
 import com.example.intouch.callback.SwipeToDeleteCallback;
-import com.example.intouch.callback.TaskCallback;
 import com.example.intouch.model.MainViewModel;
 import com.example.intouch.model.ToDoEntity;
+import com.example.intouch.service.TaskService;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
-import com.google.gson.Gson;
-import com.google.gson.reflect.TypeToken;
-
-import org.json.JSONArray;
-import org.json.JSONException;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.UUID;
-import java.util.concurrent.Executors;
-import java.util.concurrent.ThreadLocalRandom;
 
-public class MainActivity extends AppCompatActivity implements TaskCallback {
+public class MainActivity extends AppCompatActivity implements TaskService.TaskServiceCallback {
 
     private RecyclerView tasksRecycleView;
     private ToDoAdapter tasksAdapter;
     private List<ToDoEntity> tasksList;
-    private TaskApiClient taskApiClient = new TaskApiClient();
-    private TaskCallback callback;
-    private Gson gson = new Gson();
+    private TaskService taskService = new TaskService();
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -64,11 +55,11 @@ public class MainActivity extends AppCompatActivity implements TaskCallback {
             tasksAdapter.setTasks(tasksList);
         } else {
             // Fetch data if not available in the ViewModel
-            taskApiClient = new TaskApiClient();
-            fetchData();
+            taskService.fetchTasks(this);
         }
         FloatingActionButton fab = findViewById(R.id.fab);
         fab.setOnClickListener(view -> showAddTaskDialog());
+
 
         ItemTouchHelper itemTouchHelper = new ItemTouchHelper(new SwipeToDeleteCallback(new SwipeToDeleteCallback.OnSwipeCallback() {
             @Override
@@ -76,39 +67,10 @@ public class MainActivity extends AppCompatActivity implements TaskCallback {
                 ToDoEntity deletedTask = tasksList.get(position);
 
                 // Call a method to send the delete request to the backend
-                deleteTaskFromBackend(deletedTask);
+                taskService.deleteTask(deletedTask.getId(), MainActivity.this);
             }
         }));
         itemTouchHelper.attachToRecyclerView(tasksRecycleView);
-    }
-
-    private void fetchData() {
-        // Use a background thread for network operations
-        Executors.newSingleThreadExecutor().execute(() -> {
-            taskApiClient.getAllTasks(new TaskApiClient.TaskApiCallback() {
-                @Override
-                public void onTaskApiResponse(Object response) {
-                    runOnUiThread(() -> handleApiResponse((List<ToDoEntity>) response));
-                }
-
-                @Override
-                public void onTaskApiError(String errorMessage) {
-                    runOnUiThread(() -> Toast.makeText(MainActivity.this, errorMessage, Toast.LENGTH_SHORT).show());
-                }
-            });
-        });
-    }
-
-    private void handleApiResponse(List<ToDoEntity> tasks) {
-        if (tasks != null) {
-            tasksList = tasks;
-            tasksAdapter.setTasks(tasksList);
-
-            // Save data to ViewModel for configuration changes
-            ViewModelProviders.of(this).get(MainViewModel.class).setTasks(tasksList);
-        } else {
-            callback.onTaskApiError("Failed to get tasks");
-        }
     }
 
     private void showAddTaskDialog() {
@@ -135,7 +97,7 @@ public class MainActivity extends AppCompatActivity implements TaskCallback {
                     tasksAdapter.addTask(newTask);
 
                     // Call a method to send the new task to the backend
-                    sendTaskToBackend(newTask);
+                    taskService.addTask(newTask, MainActivity.this);
                 }
             }
         });
@@ -146,41 +108,31 @@ public class MainActivity extends AppCompatActivity implements TaskCallback {
         dialog.show();
     }
 
-    private void sendTaskToBackend(ToDoEntity newTask) {
-        // Use your TaskApiClient to send the new task to the backend
-        taskApiClient.addTask(newTask, new TaskApiClient.TaskApiCallback() {
-            @Override
-            public void onTaskApiResponse(Object response) {
-                fetchData();
-            }
+    @Override
+    public void onTasksFetched(List<ToDoEntity> tasks) {
+        if (tasks != null) {
+            tasksList = tasks;
+            tasksAdapter.setTasks(tasksList);
 
-            @Override
-            public void onTaskApiError(String errorMessage) {
-                callback.onTaskApiError("Unexpected response");
-            }
-        });
-    }
-
-    private void deleteTaskFromBackend(ToDoEntity deletedTask) {
-        int position = tasksList.indexOf(deletedTask);
-        if (position != -1) {
-            tasksAdapter.deleteTask(position);
+            // Save data to ViewModel for configuration changes
+            ViewModelProviders.of(this).get(MainViewModel.class).setTasks(tasksList);
+        } else {
+            onError("Failed to get tasks");
         }
-        taskApiClient.deleteTask(deletedTask.getId(), new TaskApiClient.TaskApiCallback() {
-            @Override
-            public void onTaskApiResponse(Object response) {
-                fetchData();
-            }
-
-            @Override
-            public void onTaskApiError(String errorMessage) {
-                callback.onTaskApiError("Failed to delete task:");
-            }
-        });
     }
 
     @Override
-    public void onTaskApiError(String errorMessage) {
+    public void onTaskAdded() {
+        taskService.fetchTasks(this);
+    }
+
+    @Override
+    public void onTaskDeleted() {
+        taskService.fetchTasks(this);
+    }
+
+    @Override
+    public void onError(String errorMessage) {
         Toast.makeText(MainActivity.this, errorMessage, Toast.LENGTH_SHORT).show();
     }
 }
