@@ -81,6 +81,27 @@ public class TaskApiClient {
         });
     }
 
+    public void updateTask(long taskId, ToDoEntity updatedTask, TaskApiCallback callback) {
+        System.out.println("spi client updatedTask: " + updatedTask);
+        // Assuming you have a Retrofit instance and a Retrofit service
+        Call<ToDoEntity> call = apiService.updateTask(taskId, updatedTask);
+        call.enqueue(new Callback<ToDoEntity>() {
+            @Override
+            public void onResponse(Call<ToDoEntity> call, Response<ToDoEntity> response) {
+                if (response.isSuccessful()) {
+                    callback.onTaskApiResponse(response.body());
+                } else {
+                    callback.onTaskApiError("Error updating task: " + response.errorBody());
+                }
+            }
+
+            @Override
+            public void onFailure(Call<ToDoEntity> call, Throwable t) {
+                callback.onTaskApiError("Error updating task: " + t.getMessage());
+            }
+        });
+    }
+
     public void deleteTask(long taskId, TaskApiCallback callback) {
         Call<Void> call = apiService.deleteTask(taskId);
 

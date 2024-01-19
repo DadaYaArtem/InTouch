@@ -11,15 +11,18 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.example.intouch.activity.MainActivity;
 import com.example.intouch.R;
 import com.example.intouch.model.ToDoEntity;
+import com.example.intouch.service.TaskService;
 
 import java.util.List;
 
 public class ToDoAdapter extends RecyclerView.Adapter<ToDoAdapter.ViewHolder> {
     private List<ToDoEntity> todoList;
     private MainActivity mainActivity;
+    private TaskService taskService;
 
-    public ToDoAdapter(MainActivity mainActivity) {
+    public ToDoAdapter(MainActivity mainActivity, TaskService taskService) {
         this.mainActivity = mainActivity;
+        this.taskService = taskService;
     }
 
     @Override
@@ -34,6 +37,42 @@ public class ToDoAdapter extends RecyclerView.Adapter<ToDoAdapter.ViewHolder> {
         ToDoEntity item = todoList.get(position);
         holder.task.setText(item.getDescription());
         holder.task.setChecked(item.isDone());
+
+        holder.task.setOnCheckedChangeListener((buttonView, isChecked) -> {
+            todoList.get(position).setDone(!isChecked);
+            // Assuming you have a TaskService instance
+            item.setDone(isChecked);
+            // Update the task in the MainViewModel
+            mainActivity.getViewModel().updateTask(item);
+            // Update the task on the server
+            taskService.updateTask(item.getId(), item,  new TaskService.TaskServiceCallback() {
+
+                @Override
+                public void onTasksFetched(List<ToDoEntity> tasks) {
+
+                }
+
+                @Override
+                public void onTaskAdded() {
+
+                }
+
+                @Override
+                public void onTaskDeleted() {
+
+                }
+
+                @Override
+                public void onError(String errorMessage) {
+
+                }
+
+                @Override
+                public void onTaskUpdated() {
+
+                }
+            });
+        });
     }
 
     @Override

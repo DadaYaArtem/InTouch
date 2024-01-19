@@ -1,5 +1,7 @@
 package com.example.intouch.model;
 
+import com.google.gson.annotations.SerializedName;
+
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.Getter;
@@ -11,6 +13,7 @@ import lombok.experimental.Accessors;
 @NoArgsConstructor
 public class ToDoEntity {
     private long id;
+    @SerializedName("done")
     private boolean isDone;
     private String description;
 }

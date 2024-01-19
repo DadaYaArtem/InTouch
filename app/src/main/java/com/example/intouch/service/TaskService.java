@@ -14,6 +14,8 @@ public class TaskService {
         void onTaskAdded();
         void onTaskDeleted();
         void onError(String errorMessage);
+
+        void onTaskUpdated();
     }
 
     public void fetchTasks(TaskServiceCallback callback) {
@@ -37,6 +39,22 @@ public class TaskService {
             @Override
             public void onTaskApiResponse(Object response) {
                 callback.onTaskAdded();
+            }
+
+            @Override
+            public void onTaskApiError(String errorMessage) {
+                callback.onError(errorMessage);
+            }
+        });
+    }
+
+    public void updateTask(long taskId, ToDoEntity updatedTask, TaskServiceCallback callback) {
+        System.out.println("id in service: " + taskId);
+        System.out.println("item in service: " + updatedTask);
+        taskApiClient.updateTask(taskId, updatedTask, new TaskApiClient.TaskApiCallback() {
+            @Override
+            public void onTaskApiResponse(Object response) {
+                callback.onTaskUpdated();
             }
 
             @Override

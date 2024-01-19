@@ -34,6 +34,7 @@ public class MainActivity extends AppCompatActivity implements TaskService.TaskS
     private ToDoAdapter tasksAdapter;
     private List<ToDoEntity> tasksList;
     private TaskService taskService;
+    private MainViewModel viewModel;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -53,12 +54,12 @@ public class MainActivity extends AppCompatActivity implements TaskService.TaskS
     private void setupRecyclerView() {
         tasksRecyclerView = findViewById(R.id.tasksRecycleView);
         tasksRecyclerView.setLayoutManager(new LinearLayoutManager(this));
-        tasksAdapter = new ToDoAdapter(this);
+        tasksAdapter = new ToDoAdapter(this, taskService);
         tasksRecyclerView.setAdapter(tasksAdapter);
     }
 
     private void setupViewModel() {
-        MainViewModel viewModel = new ViewModelProvider(this).get(MainViewModel.class);
+        viewModel = new ViewModelProvider(this).get(MainViewModel.class);
 
         if (viewModel.getTasks() != null && viewModel.getTasks().size() > 0) {
             tasksList = viewModel.getTasks();
@@ -136,6 +137,10 @@ public class MainActivity extends AppCompatActivity implements TaskService.TaskS
     public void onTaskAdded() {
         taskService.fetchTasks(this);
     }
+    public void onTaskUpdated() {
+        taskService.fetchTasks(this);
+    }
+
 
     @Override
     public void onTaskDeleted() {
@@ -145,5 +150,9 @@ public class MainActivity extends AppCompatActivity implements TaskService.TaskS
     @Override
     public void onError(String errorMessage) {
         Toast.makeText(MainActivity.this, errorMessage, Toast.LENGTH_SHORT).show();
+    }
+
+    public MainViewModel getViewModel() {
+        return viewModel;
     }
 }

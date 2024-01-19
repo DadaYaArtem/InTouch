@@ -19,4 +19,13 @@ public class MainViewModel extends AndroidViewModel  {
     public void setTasks(List<ToDoEntity> tasks) {
         this.tasks = tasks;
     }
+
+    public void updateTask(ToDoEntity updatedTask) {
+        for (int i = 0; i < tasks.size(); i++) {
+            if (tasks.get(i).getId() == updatedTask.getId()) {
+                tasks.set(i, updatedTask);
+                break;
+            }
+        }
+    }
 }
