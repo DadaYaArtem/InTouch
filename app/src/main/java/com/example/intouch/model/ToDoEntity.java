@@ -2,6 +2,8 @@ package com.example.intouch.model;
 
 import com.google.gson.annotations.SerializedName;
 
+import java.util.Date;
+
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.Getter;
@@ -16,4 +18,6 @@ public class ToDoEntity {
     @SerializedName("done")
     private boolean isDone;
     private String description;
+    @SerializedName("date_created")
+    private Date dateCreated;
 }

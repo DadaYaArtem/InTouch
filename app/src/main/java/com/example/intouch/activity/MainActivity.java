@@ -25,6 +25,7 @@ import com.example.intouch.service.TaskService;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
 public class MainActivity extends AppCompatActivity implements TaskService.TaskServiceCallback {
@@ -104,7 +105,8 @@ public class MainActivity extends AppCompatActivity implements TaskService.TaskS
                     ToDoEntity newTask = new ToDoEntity(
                             0,  // Assuming your backend generates the ID
                             false,
-                            taskText
+                            taskText,
+                            new Date()
                     );
                     tasksAdapter.addTask(newTask);
 
