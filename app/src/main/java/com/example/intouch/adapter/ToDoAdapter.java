@@ -37,45 +37,52 @@ public class ToDoAdapter extends RecyclerView.Adapter<ToDoAdapter.ViewHolder> {
 
     @Override
     public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
-        ToDoEntity item = todoList.get(position);
-        holder.task.setText(item.getDescription());
-        holder.task.setChecked(item.isDone());
+            ToDoEntity item = todoList.get(position);
 
-        holder.task.setOnCheckedChangeListener((buttonView, isChecked) -> {
-            todoList.get(position).setDone(!isChecked);
-            // Assuming you have a TaskService instance
-            item.setDone(isChecked);
-            // Update the task in the MainViewModel
-            mainActivity.getViewModel().updateTask(item);
-            // Update the task on the server
-            taskService.updateTask(item.getId(), item,  new TaskService.TaskServiceCallback() {
+            System.out.println("item in onBindViewHolder: " + item);
+            System.out.println("position in onBindViewHolder: " + position);
 
-                @Override
-                public void onTasksFetched(List<ToDoEntity> tasks) {
+            holder.task.setOnCheckedChangeListener(null);
 
-                }
+            holder.task.setText(item.getDescription());
+            holder.task.setChecked(item.isDone());
 
-                @Override
-                public void onTaskAdded() {
+            holder.task.setOnCheckedChangeListener((buttonView, isChecked) -> {
 
-                }
+                    item.setDone(isChecked);
+                    todoList.get(position).setDone(isChecked);
 
-                @Override
-                public void onTaskDeleted() {
+                    // Update the task in the MainViewModel
+                    mainActivity.getViewModel().updateTask(item);
+                    // Update the task on the server
+                    taskService.updateTask(item.getId(), item, new TaskService.TaskServiceCallback() {
 
-                }
+                        @Override
+                        public void onTasksFetched(List<ToDoEntity> tasks) {
 
-                @Override
-                public void onError(String errorMessage) {
+                        }
 
-                }
+                        @Override
+                        public void onTaskAdded() {
 
-                @Override
-                public void onTaskUpdated() {
+                        }
 
-                }
+                        @Override
+                        public void onTaskDeleted() {
+
+                        }
+
+                        @Override
+                        public void onError(String errorMessage) {
+
+                        }
+
+                        @Override
+                        public void onTaskUpdated() {
+
+                        }
+                    });
             });
-        });
     }
 
     @Override
