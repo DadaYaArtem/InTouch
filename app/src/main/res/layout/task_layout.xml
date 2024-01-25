@@ -20,6 +20,14 @@
             tool:text="This is sample Task inside the application"
             android:paddingStart="8dp"
             android:buttonTint="@color/green_dark"/>
+
+        <Button
+            android:id="@+id/editButton"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentEnd="true"
+            android:layout_centerVertical="true"
+            android:text="Edit" />
         
     </RelativeLayout>
 

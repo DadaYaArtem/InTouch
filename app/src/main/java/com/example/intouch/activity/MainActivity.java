@@ -122,6 +122,38 @@ public class MainActivity extends AppCompatActivity implements TaskService.TaskS
         dialog.show();
     }
 
+    public void showEditTaskDialog(ToDoEntity task) {
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        builder.setTitle("Edit Task");
+
+        View dialogView = LayoutInflater.from(this).inflate(R.layout.dialog_add_task, null);
+        final EditText taskEditText = dialogView.findViewById(R.id.editTextTask);
+        taskEditText.setText(task.getDescription());
+
+        builder.setView(dialogView);
+
+        builder.setPositiveButton("Save", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                String taskText = taskEditText.getText().toString().trim();
+
+                if (!TextUtils.isEmpty(taskText)) {
+                    // Update the task description and update it in the adapter
+                    task.setDescription(taskText);
+                    tasksAdapter.notifyDataSetChanged();
+
+                    // Call a method to send the updated task to the backend
+                    taskService.updateTask(task.getId(), task, MainActivity.this);
+                }
+            }
+        });
+
+        builder.setNegativeButton("Cancel", null);
+
+        AlertDialog dialog = builder.create();
+        dialog.show();
+    }
+
     @Override
     public void onTasksFetched(List<ToDoEntity> tasks) {
         if (tasks != null) {

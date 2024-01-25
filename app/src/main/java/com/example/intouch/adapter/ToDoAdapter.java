@@ -3,6 +3,7 @@ package com.example.intouch.adapter;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.TextView;
 
@@ -46,6 +47,13 @@ public class ToDoAdapter extends RecyclerView.Adapter<ToDoAdapter.ViewHolder> {
 
             holder.task.setText(item.getDescription());
             holder.task.setChecked(item.isDone());
+            holder.editButton.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    mainActivity.showEditTaskDialog(todoList.get(position));
+                }
+            });
+
 
             holder.task.setOnCheckedChangeListener((buttonView, isChecked) -> {
 
@@ -83,6 +91,7 @@ public class ToDoAdapter extends RecyclerView.Adapter<ToDoAdapter.ViewHolder> {
                         }
                     });
             });
+
     }
 
     @Override
@@ -107,10 +116,12 @@ public class ToDoAdapter extends RecyclerView.Adapter<ToDoAdapter.ViewHolder> {
 
     public static class ViewHolder extends RecyclerView.ViewHolder{
         CheckBox task;
+        Button editButton;
 
         public ViewHolder(View itemView) {
             super(itemView);
             task = itemView.findViewById(R.id.todoCheckBox);
+            editButton = itemView.findViewById(R.id.editButton);
         }
     }
 }
