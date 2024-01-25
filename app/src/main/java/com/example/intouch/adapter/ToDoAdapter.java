@@ -38,59 +38,55 @@ public class ToDoAdapter extends RecyclerView.Adapter<ToDoAdapter.ViewHolder> {
 
     @Override
     public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
-            ToDoEntity item = todoList.get(position);
+        ToDoEntity item = todoList.get(position);
 
-            System.out.println("item in onBindViewHolder: " + item);
-            System.out.println("position in onBindViewHolder: " + position);
+        holder.task.setOnCheckedChangeListener(null);
 
-            holder.task.setOnCheckedChangeListener(null);
+        holder.task.setText(item.getDescription());
+        holder.task.setChecked(item.isDone());
+        holder.editButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                mainActivity.showEditTaskDialog(todoList.get(position));
+            }
+        });
 
-            holder.task.setText(item.getDescription());
-            holder.task.setChecked(item.isDone());
-            holder.editButton.setOnClickListener(new View.OnClickListener() {
+
+        holder.task.setOnCheckedChangeListener((buttonView, isChecked) -> {
+            item.setDone(isChecked);
+            todoList.get(position).setDone(isChecked);
+
+            // Update the task in the MainViewModel
+            mainActivity.getViewModel().updateTask(item);
+            // Update the task on the server
+            taskService.updateTask(item.getId(), item, new TaskService.TaskServiceCallback() {
+
                 @Override
-                public void onClick(View v) {
-                    mainActivity.showEditTaskDialog(todoList.get(position));
+                public void onTasksFetched(List<ToDoEntity> tasks) {
+
+                }
+
+                @Override
+                public void onTaskAdded() {
+
+                }
+
+                @Override
+                public void onTaskDeleted() {
+
+                }
+
+                @Override
+                public void onError(String errorMessage) {
+
+                }
+
+                @Override
+                public void onTaskUpdated() {
+
                 }
             });
-
-
-            holder.task.setOnCheckedChangeListener((buttonView, isChecked) -> {
-
-                    item.setDone(isChecked);
-                    todoList.get(position).setDone(isChecked);
-
-                    // Update the task in the MainViewModel
-                    mainActivity.getViewModel().updateTask(item);
-                    // Update the task on the server
-                    taskService.updateTask(item.getId(), item, new TaskService.TaskServiceCallback() {
-
-                        @Override
-                        public void onTasksFetched(List<ToDoEntity> tasks) {
-
-                        }
-
-                        @Override
-                        public void onTaskAdded() {
-
-                        }
-
-                        @Override
-                        public void onTaskDeleted() {
-
-                        }
-
-                        @Override
-                        public void onError(String errorMessage) {
-
-                        }
-
-                        @Override
-                        public void onTaskUpdated() {
-
-                        }
-                    });
-            });
+        });
 
     }
 
@@ -99,7 +95,7 @@ public class ToDoAdapter extends RecyclerView.Adapter<ToDoAdapter.ViewHolder> {
         return todoList != null ? todoList.size() : 0;
     }
 
-    public void setTasks(List<ToDoEntity> todoList){
+    public void setTasks(List<ToDoEntity> todoList) {
         this.todoList = todoList;
         notifyDataSetChanged();
     }
@@ -114,7 +110,7 @@ public class ToDoAdapter extends RecyclerView.Adapter<ToDoAdapter.ViewHolder> {
         notifyItemRemoved(position);
     }
 
-    public static class ViewHolder extends RecyclerView.ViewHolder{
+    public static class ViewHolder extends RecyclerView.ViewHolder {
         CheckBox task;
         Button editButton;
 

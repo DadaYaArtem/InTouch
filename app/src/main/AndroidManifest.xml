@@ -17,7 +17,7 @@
         android:theme="@style/Theme.InTouch"
         tools:targetApi="31">
         <activity
-            android:name=".activity.SplashActivity"
+            android:name=".activity.LoginActivity"
             android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
