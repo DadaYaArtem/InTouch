@@ -1,11 +1,9 @@
 package com.example.intouch.api;
 
-import android.annotation.SuppressLint;
-import android.os.AsyncTask;
-
+import com.example.intouch.model.AuthenticationRequest;
+import com.example.intouch.model.AuthenticationResponse;
 import com.example.intouch.model.ToDoEntity;
 
-import java.io.IOException;
 import java.util.List;
 
 
@@ -117,6 +115,26 @@ public class TaskApiClient {
 
             @Override
             public void onFailure(Call<Void> call, Throwable t) {
+                callback.onTaskApiError("Network error: " + t.getMessage());
+            }
+        });
+    }
+
+    public void login(AuthenticationRequest request, TaskApiCallback callback) {
+        Call<AuthenticationResponse> call = apiService.login(request);
+
+        call.enqueue(new Callback<AuthenticationResponse>() {
+            @Override
+            public void onResponse(Call<AuthenticationResponse> call, Response<AuthenticationResponse> response) {
+                if (response.isSuccessful()) {
+                    callback.onTaskApiResponse(response.body());
+                } else {
+                    callback.onTaskApiError("Failed to login. Server returned " + response.code());
+                }
+            }
+
+            @Override
+            public void onFailure(Call<AuthenticationResponse> call, Throwable t) {
                 callback.onTaskApiError("Network error: " + t.getMessage());
             }
         });
