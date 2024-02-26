@@ -9,6 +9,7 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import android.content.DialogInterface;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.text.TextUtils;
 import android.view.LayoutInflater;
@@ -31,6 +32,7 @@ import java.util.List;
 public class MainActivity extends AppCompatActivity implements TaskService.TaskServiceCallback {
     private static final long NEW_TASK_ID = 0;
 
+    private long userId;
     private RecyclerView tasksRecyclerView;
     private ToDoAdapter tasksAdapter;
     private List<ToDoEntity> tasksList;
@@ -43,7 +45,12 @@ public class MainActivity extends AppCompatActivity implements TaskService.TaskS
         setContentView(R.layout.activity_main);
         getSupportActionBar().hide();
 
-        taskService = new TaskService();
+        SharedPreferences sharedPreferences = getSharedPreferences("MySharedPref", MODE_PRIVATE);
+        this.userId = sharedPreferences.getLong("userId", 0);
+        System.out.println("userId in main: " + userId);
+        System.out.println("token in main: " + sharedPreferences.getString("token", ""));
+
+        taskService = new TaskService(getApplication());
         tasksList = new ArrayList<>();
 
         setupRecyclerView();
@@ -66,7 +73,7 @@ public class MainActivity extends AppCompatActivity implements TaskService.TaskS
             tasksList = viewModel.getTasks();
             tasksAdapter.setTasks(tasksList);
         } else {
-            taskService.fetchTasks(this);
+            taskService.getTasksByUserId(userId, this);
         }
     }
 

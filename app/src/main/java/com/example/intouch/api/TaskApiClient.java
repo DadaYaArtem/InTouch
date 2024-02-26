@@ -1,7 +1,8 @@
 package com.example.intouch.api;
 
-import com.example.intouch.model.AuthenticationRequest;
-import com.example.intouch.model.AuthenticationResponse;
+import android.content.Context;
+
+
 import com.example.intouch.model.ToDoEntity;
 
 import java.util.List;
@@ -17,13 +18,21 @@ import retrofit2.converter.gson.GsonConverterFactory;
 public class TaskApiClient {
 
     private static final String BASE_URL = "http://10.0.2.2:8080/api/";
-    private OkHttpClient client = new OkHttpClient();
+    private OkHttpClient client;
     private MyApiService apiService;
+    private Context context;
 
-    public TaskApiClient() {
+    public TaskApiClient(Context context) {
+        this.context = context;
+
+        client = new OkHttpClient().newBuilder()
+                .addInterceptor(new TokenInterceptor(this.context))
+                .build();
+
         Retrofit retrofit = new Retrofit.Builder()
                 .baseUrl(BASE_URL)
                 .addConverterFactory(GsonConverterFactory.create())
+                .client(client)
                 .build();
 
         apiService = retrofit.create(MyApiService.class);
@@ -43,8 +52,31 @@ public class TaskApiClient {
             public void onResponse(Call<List<ToDoEntity>> call, Response<List<ToDoEntity>> response) {
                 if (response.isSuccessful()) {
                     callback.onTaskApiResponse(response.body());
+                    System.out.println("response code: taskapi " + response.code());
+                    System.out.println("response body: " + response.body());
                 } else {
                     callback.onTaskApiError("Failed to get tasks. Server returned " + response.code());
+                    System.out.println("response body: " + response.body());
+                }
+            }
+
+            @Override
+            public void onFailure(Call<List<ToDoEntity>> call, Throwable t) {
+                t.printStackTrace();
+                callback.onTaskApiError("Network error: " + t.getMessage());
+            }
+        });
+    }
+
+    public void getTasksByUserId(long userId, TaskApiCallback callback) {
+        Call<List<ToDoEntity>> call = apiService.getTasksByUserId(userId);
+        call.enqueue(new Callback<List<ToDoEntity>>() {
+            @Override
+            public void onResponse(Call<List<ToDoEntity>> call, Response<List<ToDoEntity>> response) {
+                if (response.isSuccessful()) {
+                    callback.onTaskApiResponse(response.body());
+                } else {
+                    callback.onTaskApiError("getTasksByUserId: Failed to get tasks for user. Server returned " + response.code());
                 }
             }
 
@@ -63,16 +95,19 @@ public class TaskApiClient {
             @Override
             public void onResponse(Call<ToDoEntity> call, Response<ToDoEntity> response) {
                 if (response.isSuccessful()) {
+                    System.out.println("response code taskapi: " + response.code() );
                     // Notify the callback that the task was successfully added
                     callback.onTaskApiResponse("Task added successfully");
                 } else {
                     // Notify the callback about the error
+
                     callback.onTaskApiError("Failed to add task. Server returned " + response.code());
                 }
             }
 
             @Override
             public void onFailure(Call<ToDoEntity> call, Throwable t) {
+                t.printStackTrace();
                 // Notify the callback about the network error
                 callback.onTaskApiError("Network error: " + t.getMessage());
             }
@@ -115,26 +150,6 @@ public class TaskApiClient {
 
             @Override
             public void onFailure(Call<Void> call, Throwable t) {
-                callback.onTaskApiError("Network error: " + t.getMessage());
-            }
-        });
-    }
-
-    public void login(AuthenticationRequest request, TaskApiCallback callback) {
-        Call<AuthenticationResponse> call = apiService.login(request);
-
-        call.enqueue(new Callback<AuthenticationResponse>() {
-            @Override
-            public void onResponse(Call<AuthenticationResponse> call, Response<AuthenticationResponse> response) {
-                if (response.isSuccessful()) {
-                    callback.onTaskApiResponse(response.body());
-                } else {
-                    callback.onTaskApiError("Failed to login. Server returned " + response.code());
-                }
-            }
-
-            @Override
-            public void onFailure(Call<AuthenticationResponse> call, Throwable t) {
                 callback.onTaskApiError("Network error: " + t.getMessage());
             }
         });

@@ -1,5 +1,7 @@
 package com.example.intouch.service;
 
+import android.app.Application;
+
 import com.example.intouch.api.TaskApiClient;
 import com.example.intouch.model.ToDoEntity;
 
@@ -7,7 +9,13 @@ import java.util.List;
 import java.util.concurrent.Executors;
 
 public class TaskService {
-    private TaskApiClient taskApiClient = new TaskApiClient();
+//    private TaskApiClient taskApiClient = new TaskApiClient();
+
+    private TaskApiClient taskApiClient;
+
+    public TaskService(Application application) {
+        taskApiClient = new TaskApiClient(application);
+    }
 
     public interface TaskServiceCallback {
         void onTasksFetched(List<ToDoEntity> tasks);
@@ -28,6 +36,23 @@ public class TaskService {
 
                 @Override
                 public void onTaskApiError(String errorMessage) {
+                    callback.onError(errorMessage);
+                }
+            });
+        });
+    }
+
+    public void getTasksByUserId(long userId, TaskServiceCallback callback) {
+        Executors.newSingleThreadExecutor().execute(() -> {
+            taskApiClient.getTasksByUserId(userId, new TaskApiClient.TaskApiCallback() {
+                @Override
+                public void onTaskApiResponse(Object response) {
+                    callback.onTasksFetched((List<ToDoEntity>) response);
+                }
+
+                @Override
+                public void onTaskApiError(String errorMessage) {
+                    System.out.println("nichego ne rabotaet v getTasksByUserId taskService");
                     callback.onError(errorMessage);
                 }
             });

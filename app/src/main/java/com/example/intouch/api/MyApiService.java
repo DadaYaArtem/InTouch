@@ -18,6 +18,9 @@ public interface MyApiService {
     @GET("tasks")
     Call<List<ToDoEntity>> getAllTasks();
 
+    @GET("tasks/user/{userId}")
+    Call<List<ToDoEntity>> getTasksByUserId(@Path("userId") Long taskId);
+
     @POST("tasks")
     Call<ToDoEntity> addTask(@Body ToDoEntity task);
 
