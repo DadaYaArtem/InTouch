@@ -118,7 +118,7 @@ public class MainActivity extends AppCompatActivity implements TaskService.TaskS
                     tasksAdapter.addTask(newTask);
 
                     // Call a method to send the new task to the backend
-                    taskService.addTask(newTask, MainActivity.this);
+                    taskService.addTask(newTask, userId, MainActivity.this);
                 }
             }
         });
@@ -176,22 +176,16 @@ public class MainActivity extends AppCompatActivity implements TaskService.TaskS
 
     @Override
     public void onTaskAdded() {
-        SharedPreferences sharedPreferences = getSharedPreferences("MySharedPref", MODE_PRIVATE);
-        this.userId = sharedPreferences.getLong("userId", 0);
         taskService.getTasksByUserId(userId, this);
     }
 
     public void onTaskUpdated() {
-        SharedPreferences sharedPreferences = getSharedPreferences("MySharedPref", MODE_PRIVATE);
-        this.userId = sharedPreferences.getLong("userId", 0);
         taskService.getTasksByUserId(userId, this);
     }
 
 
     @Override
     public void onTaskDeleted() {
-        SharedPreferences sharedPreferences = getSharedPreferences("MySharedPref", MODE_PRIVATE);
-        this.userId = sharedPreferences.getLong("userId", 0);
         taskService.getTasksByUserId(userId, this);
     }
 

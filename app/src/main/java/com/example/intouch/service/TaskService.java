@@ -59,8 +59,8 @@ public class TaskService {
         });
     }
 
-    public void addTask(ToDoEntity newTask, TaskServiceCallback callback) {
-        taskApiClient.addTask(newTask, new TaskApiClient.TaskApiCallback() {
+    public void addTask(ToDoEntity newTask, long userId, TaskServiceCallback callback) {
+        taskApiClient.addTask(newTask, userId, new TaskApiClient.TaskApiCallback() {
             @Override
             public void onTaskApiResponse(Object response) {
                 callback.onTaskAdded();

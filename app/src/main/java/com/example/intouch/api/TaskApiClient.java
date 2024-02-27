@@ -87,9 +87,9 @@ public class TaskApiClient {
         });
     }
 
-    public void addTask(ToDoEntity task, TaskApiCallback callback) {
+    public void addTask(ToDoEntity task, long userId, TaskApiCallback callback) {
         // Assuming you have a specific endpoint for adding tasks in YourApiService
-        Call<ToDoEntity> call = apiService.addTask(task);
+        Call<ToDoEntity> call = apiService.addTask(task, userId);
 
         call.enqueue(new Callback<ToDoEntity>() {
             @Override
