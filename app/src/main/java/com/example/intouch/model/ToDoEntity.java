@@ -20,4 +20,5 @@ public class ToDoEntity {
     private String description;
     @SerializedName("date_created")
     private Date dateCreated;
+
 }

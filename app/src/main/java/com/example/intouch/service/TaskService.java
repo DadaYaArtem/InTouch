@@ -26,21 +26,21 @@ public class TaskService {
         void onTaskUpdated();
     }
 
-    public void fetchTasks(TaskServiceCallback callback) {
-        Executors.newSingleThreadExecutor().execute(() -> {
-            taskApiClient.getAllTasks(new TaskApiClient.TaskApiCallback() {
-                @Override
-                public void onTaskApiResponse(Object response) {
-                    callback.onTasksFetched((List<ToDoEntity>) response);
-                }
-
-                @Override
-                public void onTaskApiError(String errorMessage) {
-                    callback.onError(errorMessage);
-                }
-            });
-        });
-    }
+//    public void fetchTasks(TaskServiceCallback callback) {
+//        Executors.newSingleThreadExecutor().execute(() -> {
+//            taskApiClient.getAllTasks(new TaskApiClient.TaskApiCallback() {
+//                @Override
+//                public void onTaskApiResponse(Object response) {
+//                    callback.onTasksFetched((List<ToDoEntity>) response);
+//                }
+//
+//                @Override
+//                public void onTaskApiError(String errorMessage) {
+//                    callback.onError(errorMessage);
+//                }
+//            });
+//        });
+//    }
 
     public void getTasksByUserId(long userId, TaskServiceCallback callback) {
         Executors.newSingleThreadExecutor().execute(() -> {

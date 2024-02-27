@@ -22,6 +22,11 @@ public class LoginActivity extends AppCompatActivity {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+        SharedPreferences sharedPreferences = getSharedPreferences("MySharedPref", MODE_PRIVATE);
+        SharedPreferences.Editor myEdit = sharedPreferences.edit();
+        myEdit.remove("token");
+        myEdit.apply();
+
         super.onCreate(savedInstanceState);
         setContentView(R.layout.login_layout);
 

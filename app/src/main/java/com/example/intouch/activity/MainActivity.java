@@ -176,16 +176,23 @@ public class MainActivity extends AppCompatActivity implements TaskService.TaskS
 
     @Override
     public void onTaskAdded() {
-        taskService.fetchTasks(this);
+        SharedPreferences sharedPreferences = getSharedPreferences("MySharedPref", MODE_PRIVATE);
+        this.userId = sharedPreferences.getLong("userId", 0);
+        taskService.getTasksByUserId(userId, this);
     }
+
     public void onTaskUpdated() {
-        taskService.fetchTasks(this);
+        SharedPreferences sharedPreferences = getSharedPreferences("MySharedPref", MODE_PRIVATE);
+        this.userId = sharedPreferences.getLong("userId", 0);
+        taskService.getTasksByUserId(userId, this);
     }
 
 
     @Override
     public void onTaskDeleted() {
-        taskService.fetchTasks(this);
+        SharedPreferences sharedPreferences = getSharedPreferences("MySharedPref", MODE_PRIVATE);
+        this.userId = sharedPreferences.getLong("userId", 0);
+        taskService.getTasksByUserId(userId, this);
     }
 
     @Override
