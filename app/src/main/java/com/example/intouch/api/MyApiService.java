@@ -2,6 +2,7 @@ package com.example.intouch.api;
 
 import com.example.intouch.model.AuthenticationRequest;
 import com.example.intouch.model.AuthenticationResponse;
+import com.example.intouch.model.RegisterRequest;
 import com.example.intouch.model.ToDoEntity;
 
 import java.util.List;
@@ -32,4 +33,7 @@ public interface MyApiService {
 
     @POST("auth/login")
     Call<AuthenticationResponse> login(@Body AuthenticationRequest request);
+
+    @POST("auth/register")
+    Call<AuthenticationResponse> register(@Body RegisterRequest request);
 }

@@ -5,6 +5,7 @@ import android.content.Context;
 import com.example.intouch.api.AuthApiClient;
 import com.example.intouch.model.AuthenticationRequest;
 import com.example.intouch.model.AuthenticationResponse;
+import com.example.intouch.model.RegisterRequest;
 
 import java.util.concurrent.Executors;
 
@@ -23,6 +24,23 @@ public class AuthService {
     public void login(AuthenticationRequest request, AuthServiceCallback callback) {
         Executors.newSingleThreadExecutor().execute(() -> {
             authApiClient.login(request, new AuthApiClient.AuthApiCallback() {
+
+                @Override
+                public void onAuthApiResponse(Object response) {
+                    callback.onLoginSuccess((AuthenticationResponse) response);
+                }
+
+                @Override
+                public void onAuthApiError(String errorMessage) {
+                    callback.onError(errorMessage);
+                }
+            });
+        });
+    }
+
+    public void register(RegisterRequest request, AuthServiceCallback callback) {
+        Executors.newSingleThreadExecutor().execute(() -> {
+            authApiClient.register(request, new AuthApiClient.AuthApiCallback() {
 
                 @Override
                 public void onAuthApiResponse(Object response) {

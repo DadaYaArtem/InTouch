@@ -5,6 +5,7 @@ import android.content.SharedPreferences;
 
 import com.example.intouch.model.AuthenticationRequest;
 import com.example.intouch.model.AuthenticationResponse;
+import com.example.intouch.model.RegisterRequest;
 import com.example.intouch.model.ToDoEntity;
 
 import java.util.List;
@@ -54,6 +55,34 @@ public class AuthApiClient {
 
     public void login(AuthenticationRequest request, AuthApiCallback callback) {
         Call<AuthenticationResponse> call = apiService.login(request);
+
+        call.enqueue(new Callback<AuthenticationResponse>() {
+            @Override
+            public void onResponse(Call<AuthenticationResponse> call, Response<AuthenticationResponse> response) {
+                if (response.isSuccessful()) {
+                    callback.onAuthApiResponse(response.body());
+
+                    long userId = response.body().getUserId();
+                    saveUserId(userId);
+
+                    System.out.println("response code apiclient: " + response.code() );
+                    System.out.println("userId apiclient: " + response.body().getUserId());
+
+                } else {
+                    callback.onAuthApiError("Failed to login. Server returned " + response.code());
+                }
+            }
+
+            @Override
+            public void onFailure(Call<AuthenticationResponse> call, Throwable t) {
+                t.printStackTrace();
+                callback.onAuthApiError("Network error: " + t.getMessage());
+            }
+        });
+    }
+
+    public void register(RegisterRequest request, AuthApiCallback callback) {
+        Call<AuthenticationResponse> call = apiService.register(request);
 
         call.enqueue(new Callback<AuthenticationResponse>() {
             @Override
